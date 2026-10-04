@@ -1,0 +1,272 @@
+FeedbackController.cs
+using FeedbackManagement.Models;
+using Microsoft.AspNetCore.Mvc;
+
+namespace FeedbackManagement.Controllers
+{
+    public class FeedbackController : Controller
+    {
+        [HttpGet]
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult Index(Feedback feedback)
+        {
+            if (ModelState.IsValid)
+            {
+                return RedirectToAction("AddRecord", feedback);
+            }
+
+            return View(feedback);
+        }
+
+        [HttpGet]
+        public IActionResult AddRecord(Feedback feedback)
+        {
+            return View(feedback);
+        }
+    }
+}
+
+
+Feedback.cs
+using System.ComponentModel.DataAnnotations;
+
+namespace FeedbackManagement.Models
+{
+    public class Feedback
+    {
+        public int Id { get; set; }
+
+        [Required(ErrorMessage = "Please enter your name.")]
+        [StringLength(50, MinimumLength = 3,
+            ErrorMessage = "Name must be between 3 and 50 characters.")]
+        [RegularExpression(@"^[a-zA-Z\s]+$",
+            ErrorMessage = "Name can contain only letters and spaces.")]
+        [Display(Name = "Full Name")]
+        public string Name { get; set; }
+
+        [Required(ErrorMessage = "Please enter your email.")]
+        [EmailAddress(ErrorMessage = "Please enter a valid email address.")]
+        [StringLength(100,
+            ErrorMessage = "Email cannot exceed 100 characters.")]
+        [Display(Name = "Email Address")]
+        public string Email { get; set; }
+
+        [Required(ErrorMessage = "Please select a rating.")]
+        [Display(Name = "Rating")]
+        public string Rating { get; set; }
+
+        [Required(ErrorMessage = "Please enter your feedback.")]
+        [StringLength(500, MinimumLength = 10,
+            ErrorMessage = "Feedback must be between 10 and 500 characters.")]
+        [Display(Name = "Your Feedback")]
+        public string Message { get; set; }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+Index.cshtml
+@model FeedbackManagement.Models.Feedback
+@{
+    ViewData["Title"] = "Feedback";
+}
+
+<h2 class="text-center mb-4">
+    Feedback Management
+</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+<div class="card shadow p-4">
+    <h4>Submit Your Feedback</h4>
+    <hr />
+    <partial name="_FeedbackForm" model="Model" />
+</div>
+
+@section Scripts
+{
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
+Layout.cshtml
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>@ViewData["Title"] - Feedback Management</title>
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+</head>
+
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand"
+               asp-controller="Feedback"
+               asp-action="Index">
+                Feedback Management
+            </a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        @RenderBody()
+    </div>
+
+    <footer class="text-center mt-5">
+        <hr />
+        <p>© 2026 Feedback Management System</p>
+    </footer>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
+
+FeedbackForm.cshtml
+@model FeedbackManagement.Models.Feedback
+
+<form asp-controller="Feedback"
+      asp-action="Index"
+      method="post">
+
+    <!-- Full Name -->
+    <div class="mb-3">
+        @Html.LabelFor(model => model.Name,
+            new { @class = "form-label" })
+
+        @Html.TextBoxFor(model => model.Name, new
+        {
+            @class = "form-control",
+            placeholder = "Enter your full name"
+        })
+
+        @Html.ValidationMessageFor(model => model.Name, "",
+            new { @class = "text-danger" })
+    </div>
+
+    <!-- Email -->
+    <div class="mb-3">
+        @Html.LabelFor(model => model.Email,
+            new { @class = "form-label" })
+
+        @Html.TextBoxFor(model => model.Email, new
+        {
+            @class = "form-control",
+            type = "email",
+            placeholder = "example@gmail.com"
+        })
+
+        @Html.ValidationMessageFor(model => model.Email, "",
+            new { @class = "text-danger" })
+    </div>
+
+    <!-- Rating -->
+    <div class="mb-3">
+        @Html.LabelFor(model => model.Rating,
+            new { @class = "form-label" })
+
+        <div class="mt-2">
+
+            <div class="form-check">
+                @Html.RadioButtonFor(
+                    model => model.Rating,
+                    "Excellent",
+                    new { @class = "form-check-input" })
+
+                <label class="form-check-label">
+                    Excellent
+                </label>
+            </div>
+
+            <div class="form-check">
+                @Html.RadioButtonFor(
+                    model => model.Rating,
+                    "Good",
+                    new { @class = "form-check-input" })
+
+                <label class="form-check-label">
+                    Good
+                </label>
+            </div>
+
+            <div class="form-check">
+                @Html.RadioButtonFor(
+                    model => model.Rating,
+                    "Average",
+                    new { @class = "form-check-input" })
+
+                <label class="form-check-label">
+                    Average
+                </label>
+            </div>
+
+            <div class="form-check">
+                @Html.RadioButtonFor(
+                    model => model.Rating,
+                    "Poor",
+                    new { @class = "form-check-input" })
+
+                <label class="form-check-label">
+                    Poor
+                </label>
+            </div>
+
+        </div>
+
+        @Html.ValidationMessageFor(model => model.Rating, "",
+            new { @class = "text-danger" })
+    </div>
+
+    <!-- Feedback -->
+    <div class="mb-3">
+        @Html.LabelFor(model => model.Message,
+            new { @class = "form-label" })
+
+        @Html.TextAreaFor(model => model.Message, new
+        {
+            @class = "form-control",
+            rows = "5",
+            placeholder = "Enter your feedback (10-500 characters)"
+        })
+
+        @Html.ValidationMessageFor(model => model.Message, "",
+            new { @class = "text-danger" })
+    </div>
+
+    <!-- Buttons -->
+    <div class="mt-4">
+        <button type="submit"
+                class="btn btn-primary">
+            Submit Feedback
+        </button>
+
+        <button type="reset"
+                class="btn btn-secondary">
+            Reset
+        </button>
+    </div>
+
+</form>
+
